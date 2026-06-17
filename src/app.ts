@@ -1,5 +1,5 @@
-import cors from "cors";
-import express from "express";
+import cors, { type CorsOptionsDelegate } from "cors";
+import express, { type Request } from "express";
 import helmet from "helmet";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/error-handler.js";
@@ -16,22 +16,27 @@ export const createApp = () => {
   const app = express();
   const allowDevOrigin = (origin: string) =>
     !env.isProduction && /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+  const isApiV1Request = (requestPath: string) =>
+    requestPath === "/api/v1" || requestPath.startsWith("/api/v1/");
+  const corsOptions: CorsOptionsDelegate<Request> = (req, callback) => {
+    const origin = req.header("Origin");
+    const isAllowedOrigin =
+      !origin || isApiV1Request(req.path) || origin === env.corsOrigin || allowDevOrigin(origin);
+
+    if (!isAllowedOrigin) {
+      callback(new Error("Not allowed by CORS"));
+      return;
+    }
+
+    callback(null, {
+      origin: true,
+      credentials: true,
+    });
+  };
 
   app.disable("x-powered-by");
   app.use(helmet());
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        if (!origin || origin === env.corsOrigin || allowDevOrigin(origin)) {
-          callback(null, true);
-          return;
-        }
-
-        callback(new Error("Not allowed by CORS"));
-      },
-      credentials: true,
-    }),
-  );
+  app.use(cors(corsOptions));
   app.use(express.json({ limit: "100kb" }));
 
   app.get("/health", (_req, res) => {
