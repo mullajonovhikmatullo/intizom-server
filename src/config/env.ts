@@ -12,7 +12,7 @@ const envSchema = z
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     PORT: z.coerce.number().int().positive().default(4000),
     DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-    CORS_ORIGIN: z.string().min(1).default("http://localhost:5173"),
+    CORS_ORIGIN: z.string().min(1).default("http://localhost:8080"),
     JWT_SECRET: z
       .string()
       .min(32, "JWT_SECRET must be at least 32 characters")
@@ -44,7 +44,9 @@ export const env = {
   isProduction: parsed.data.NODE_ENV === "production",
   port: parsed.data.PORT,
   databaseUrl: parsed.data.DATABASE_URL,
-  corsOrigin: parsed.data.CORS_ORIGIN,
+  corsOrigins: parsed.data.CORS_ORIGIN.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   jwtSecret: parsed.data.JWT_SECRET,
   jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
 };

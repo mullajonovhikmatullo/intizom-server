@@ -16,12 +16,10 @@ export const createApp = () => {
   const app = express();
   const allowDevOrigin = (origin: string) =>
     !env.isProduction && /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
-  const isApiV1Request = (requestPath: string) =>
-    requestPath === "/api/v1" || requestPath.startsWith("/api/v1/");
   const corsOptions: CorsOptionsDelegate<Request> = (req, callback) => {
     const origin = req.header("Origin");
     const isAllowedOrigin =
-      !origin || isApiV1Request(req.path) || origin === env.corsOrigin || allowDevOrigin(origin);
+      !origin || env.corsOrigins.includes(origin) || allowDevOrigin(origin);
 
     if (!isAllowedOrigin) {
       callback(new Error("Not allowed by CORS"));
