@@ -36,12 +36,9 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+    # Loopback only; the host's Caddy terminates TLS for discip.uz and proxies here.
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /opt/intizom/certbot-webroot:/var/www/certbot
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - "127.0.0.1:8081:80"
 
 volumes:
   db-data:

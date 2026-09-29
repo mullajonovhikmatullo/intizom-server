@@ -23,14 +23,10 @@ just that service (`docker compose build <service> && docker compose up -d
 To change env vars or secrets, edit `/opt/intizom/.env` on the server and
 run `docker compose up -d` there.
 
-## SSL (discip.uz)
+## Domain and TLS (discip.uz)
 
-`certbot-auto.sh` + `certbot-auto.timer`/`.service` run on the server
-(installed under `/etc/systemd/system`, script at `/opt/intizom/`) on a
-10-minute timer, checking whether `discip.uz` resolves to the VPS yet. Once
-it does, it issues the Let's Encrypt cert, installs a renewal deploy-hook
-that reloads the `web` container, restarts `web` (which then picks the
-HTTPS nginx config automatically, see `intizom-client`'s
-`docker-entrypoint.sh`), and disables its own timer. No further action
-needed once DNS is pointed at the server. `setup-ssl.sh` is the same flow
-as a one-off manual script, kept for reference.
+`web` only listens on `127.0.0.1:8081`. The host runs Caddy (shared with the
+mavion.uz stack; config lives in the akfa-erp-server repo at
+`deploy/Caddyfile`, installed at `/etc/caddy/Caddyfile`), which owns
+ports 80/443, obtains and renews the Let's Encrypt cert for `discip.uz` on
+its own once DNS points at the VPS, and proxies to `web`.

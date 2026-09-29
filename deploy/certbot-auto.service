@@ -1,6 +1,0 @@
-[Unit]
-Description=Issue Let's Encrypt cert for discip.uz once DNS resolves to this host
-
-[Service]
-Type=oneshot
-ExecStart=/opt/intizom/certbot-auto.sh
