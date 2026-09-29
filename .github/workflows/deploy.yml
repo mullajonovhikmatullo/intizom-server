@@ -1,0 +1,26 @@
+name: Deploy backend
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/intizom/server
+            git fetch origin release
+            git reset --hard origin/release
+            cd /opt/intizom
+            docker compose build backend
+            docker compose up -d backend
+            docker image prune -f
