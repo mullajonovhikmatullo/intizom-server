@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodically check discip.uz DNS and issue cert when ready
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+Unit=certbot-auto.service
+
+[Install]
+WantedBy=timers.target
