@@ -5,9 +5,12 @@ import type { ListExpensesQuery } from "./expenses.validation.js";
 import {
   createExpense,
   deleteExpense,
+  deleteExpenseBudget,
   getExpense,
+  getExpenseBudget,
   getExpenseSummary,
   listExpenses,
+  setExpenseBudget,
   updateExpense,
 } from "./expenses.service.js";
 import {
@@ -15,6 +18,7 @@ import {
   expenseIdParamsSchema,
   expenseSummaryQuerySchema,
   listExpensesQuerySchema,
+  setExpenseBudgetSchema,
   updateExpenseSchema,
 } from "./expenses.validation.js";
 
@@ -26,6 +30,33 @@ expensesRouter.get("/summary", validateQuery(expenseSummaryQuerySchema), async (
   try {
     const data = await getExpenseSummary(req.user!.id, req.query);
     res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+expensesRouter.get("/budget", async (req, res, next) => {
+  try {
+    const data = await getExpenseBudget(req.user!.id);
+    res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+expensesRouter.put("/budget", validateBody(setExpenseBudgetSchema), async (req, res, next) => {
+  try {
+    const data = await setExpenseBudget(req.user!.id, req.body);
+    res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+expensesRouter.delete("/budget", async (req, res, next) => {
+  try {
+    await deleteExpenseBudget(req.user!.id);
+    res.status(204).send();
   } catch (error) {
     next(error);
   }

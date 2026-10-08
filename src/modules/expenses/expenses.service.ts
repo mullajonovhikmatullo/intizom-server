@@ -7,6 +7,7 @@ import type {
   CreateExpenseInput,
   ExpenseSummaryQuery,
   ListExpensesQuery,
+  SetExpenseBudgetInput,
   UpdateExpenseInput,
 } from "./expenses.validation.js";
 
@@ -204,4 +205,33 @@ export const getExpenseSummary = async (userId: string, query: ExpenseSummaryQue
         })),
     })),
   };
+};
+
+const toPublicBudget = (budget: { weeklyAmount: { toNumber(): number }; currency: string }) => ({
+  weeklyAmount: budget.weeklyAmount.toNumber(),
+  currency: budget.currency,
+});
+
+export const getExpenseBudget = async (userId: string) => {
+  const budget = await prisma.expenseBudget.findUnique({
+    where: { userId },
+    select: { weeklyAmount: true, currency: true },
+  });
+
+  return budget ? toPublicBudget(budget) : null;
+};
+
+export const setExpenseBudget = async (userId: string, input: SetExpenseBudgetInput) => {
+  const budget = await prisma.expenseBudget.upsert({
+    where: { userId },
+    create: { userId, weeklyAmount: input.weeklyAmount, currency: input.currency },
+    update: { weeklyAmount: input.weeklyAmount, currency: input.currency },
+    select: { weeklyAmount: true, currency: true },
+  });
+
+  return toPublicBudget(budget);
+};
+
+export const deleteExpenseBudget = async (userId: string) => {
+  await prisma.expenseBudget.deleteMany({ where: { userId } });
 };

@@ -67,7 +67,13 @@ export const updateExpenseSchema = z
   })
   .refine((value) => Object.keys(value).length > 0, "At least one field is required");
 
+export const setExpenseBudgetSchema = z.object({
+  weeklyAmount: amountSchema,
+  currency: currencySchema,
+});
+
 export type ListExpensesQuery = z.infer<typeof listExpensesQuerySchema>;
 export type ExpenseSummaryQuery = z.infer<typeof expenseSummaryQuerySchema>;
 export type CreateExpenseInput = z.infer<typeof createExpenseSchema>;
 export type UpdateExpenseInput = z.infer<typeof updateExpenseSchema>;
+export type SetExpenseBudgetInput = z.infer<typeof setExpenseBudgetSchema>;
