@@ -1,4 +1,3 @@
-import { HabitType } from "../../../generated/prisma/enums.js";
 import { addDays, todayKey, toDateKey, toDateOnly } from "../../lib/date.js";
 import { HttpError } from "../../lib/http-error.js";
 import { toPagination } from "../../lib/pagination.js";
@@ -16,7 +15,6 @@ const habitSelect = {
   id: true,
   title: true,
   time: true,
-  type: true,
   createdAt: true,
   targetDays: true,
   pinned: true,
@@ -26,7 +24,6 @@ type PublicHabitRecord = {
   id: string;
   title: string;
   time: string | null;
-  type: HabitType;
   createdAt: Date;
   targetDays: number;
   pinned: boolean;
@@ -45,7 +42,6 @@ const toPublicHabit = (habit: PublicHabitRecord) => ({
   id: habit.id,
   title: habit.title,
   time: habit.time ?? undefined,
-  type: habit.type,
   createdAt: habit.createdAt,
   targetDays: habit.targetDays,
   pinned: habit.pinned,
@@ -64,10 +60,7 @@ const findUserHabit = async (userId: string, habitId: string) => {
 };
 
 export const listHabits = async (userId: string, query: ListHabitsQuery) => {
-  const where = {
-    userId,
-    ...(query.type ? { type: query.type as HabitType } : {}),
-  };
+  const where = { userId };
 
   const [habits, total] = await Promise.all([
     prisma.habit.findMany({
@@ -137,7 +130,6 @@ export const createHabit = async (userId: string, input: CreateHabitInput) => {
       userId,
       title: input.title,
       time: input.time,
-      type: input.type,
       targetDays: input.targetDays,
     },
     select: habitSelect,
@@ -240,7 +232,6 @@ export const getHabitStats = async (userId: string) => {
     where: { userId },
     select: {
       id: true,
-      type: true,
       pinned: true,
       createdAt: true,
       logs: {
@@ -264,8 +255,7 @@ export const getHabitStats = async (userId: string) => {
 
     const done = active.reduce((count, habit) => {
       const completed = logsByHabit.get(habit.id)?.get(date) ?? false;
-      const success = habit.type === HabitType.good ? completed : !completed;
-      return count + (success ? 1 : 0);
+      return count + (completed ? 1 : 0);
     }, 0);
 
     return Math.round((done / active.length) * 100);
@@ -300,8 +290,6 @@ export const getHabitStats = async (userId: string) => {
 
   return {
     total: habits.length,
-    good: habits.filter((habit) => habit.type === HabitType.good).length,
-    bad: habits.filter((habit) => habit.type === HabitType.bad).length,
     pinned: habits.filter((habit) => habit.pinned).length,
     todayPct: completionForDate(today),
     weekPct,

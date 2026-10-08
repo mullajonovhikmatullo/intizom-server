@@ -7,11 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum HabitType {
-  good
-  bad
-}
-
 enum ExpenseCategory {
   food
   transport
@@ -56,7 +51,6 @@ model Habit {
   userId     String
   title      String    @db.VarChar(160)
   time       String?   @db.VarChar(5)
-  type       HabitType
   targetDays Int       @default(90)
   pinned     Boolean   @default(false)
   createdAt  DateTime  @default(now())
@@ -66,7 +60,6 @@ model Habit {
   logs HabitLog[]
 
   @@index([userId])
-  @@index([userId, type])
   @@index([userId, createdAt])
 }
 

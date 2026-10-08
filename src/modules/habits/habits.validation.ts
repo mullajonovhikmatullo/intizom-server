@@ -28,7 +28,6 @@ export const listHabitLogsQuerySchema = z
   });
 
 export const listHabitsQuerySchema = z.object({
-  type: z.enum(["good", "bad"]).optional(),
   page: z.coerce.number().int().min(1).default(DEFAULT_PAGE),
   limit: z.coerce.number().int().min(1).max(MAX_LIMIT).default(DEFAULT_LIMIT),
 });
@@ -36,7 +35,6 @@ export const listHabitsQuerySchema = z.object({
 export const createHabitSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(160, "Title is too long"),
   time: timeSchema,
-  type: z.enum(["good", "bad"]),
   targetDays: z.coerce.number().int().min(1).max(3650),
 });
 
@@ -44,8 +42,7 @@ export const updateHabitSchema = z
   .object({
     title: z.string().trim().min(1, "Title is required").max(160, "Title is too long").optional(),
     time: timeSchema.nullable().optional(),
-    type: z.enum(["good", "bad"]).optional(),
-    targetDays: z.coerce.number().int().min(1).max(3650).optional(),
+      targetDays: z.coerce.number().int().min(1).max(3650).optional(),
   })
   .refine((value) => Object.keys(value).length > 0, "At least one field is required");
 
